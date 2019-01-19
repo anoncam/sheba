@@ -14,7 +14,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-// testing the github bot 
+// testing the github bot
 package main
 
 import (
@@ -40,7 +40,7 @@ import (
 /* --- config --- */
 const (
 	/* --- url settings ---  */
-  FormVal      = "p"
+  formVal      = "p"
 	siteName     = "SHEBASH" // 7 char long title
 	minPasteSize = 16
 	maxPasteSize = 1024 * 1024 * 1024                                                // 1024 MB
@@ -256,7 +256,7 @@ func Highlight(code string, lexer string, key string) (string, error) {
 	return out.String(), err
 }
 
-func (h *handler) virus(w http.ResponseWriter, req *http.Request) {
+func (h *handler) scan(w http.ResponseWriter, req *http.Request) {
 	j := diskv.New(diskv.Options{
 		BasePath:     fmt.Sprintf("%s/_scan", basePath),
 		Transform:    flatTransform,
