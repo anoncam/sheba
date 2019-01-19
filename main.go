@@ -18,11 +18,10 @@
 package main
 
 import (
-	"bytes"
-	"encoding/base64"
 	"fmt"
-	chroma "github.com/alecthomas/chroma"
-	virustotal "github.com/dutchcoders/go-virustotal"
+	. "github.com/alecthomas/chroma/formatters"
+	"github.com/alecthomas/chroma/styles"
+	"github.com/dutchcoders/go-virustotal"
 	"github.com/gorilla/mux"
 	"github.com/peterbourgon/diskv"
 	md "github.com/shurcooL/github_flavored_markdown"
@@ -32,7 +31,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 	"time"
@@ -41,10 +39,10 @@ import (
 /* --- config --- */
 const (
 	/* --- url settings ---  */
-  formVal      = "p"
+	formVal      = "p"
 	siteName     = "SHEBASH" // 7 char long title
 	minPasteSize = 16
-	maxPasteSize = 1024 * 1024 * 1024                                                // 1024 MB
+	maxPasteSize = 1024 * 1024 * 1024                                               // 1024 MB
 	urlLength    = 8                                                                // charlength of the url
 	urlCharset   = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" // available characters the url can use
 
@@ -58,12 +56,13 @@ const (
 	sslCertPath = "cert/fullchain.pem" // ssl cert
 	sslKeyPath  = "cert/privkey.pem"   // ssl priv key
 	apiKeyPath  = "cert/api.txt"       // postal api key
-	vtKeyPath   = "cert/vt.txt"      // virustotal api key
-	httpPort    = 80 // http port
-	bindAddress = "" // bind address
+	vtKeyPath   = "cert/vt.txt"        // virustotal api key
+	httpPort    = 80                   // http port
+	bindAddress = ""                   // bind address
 )
 
-var apiKey string
+//Postal api
+//var apiKey string
 
 var vtKey string
 
@@ -131,7 +130,7 @@ UNIQUE SUBDIRS
     <a href="http://{{.BaseURL}}/static/">{{.BaseURL}}/static/</a> is a static file server.
     <a href="http://{{.BaseURL}}/temp/">{{.BaseURL}}/temp/</a> is for burner pastes.
     <a href="http://{{.BaseURL}}/md/">{{.BaseURL}}/md/</a> render md file to html for webviewing.
-		<a href="http://{{.BaseURL}}/scan/">{{.BaseURL}}/scan/</a> Use virus total api to return a report of a file you tee off to scan.
+    <a href="http://{{.BaseURL}}/scan/">{{.BaseURL}}/scan/</a> Use virus total api to return a report of a file you tee off to scan.
 
 SEE ALSO
     {{.Name}} brought to you for free and open source at <a href="https://github.com/anoncam/sheba">https://github.com/anoncam/sheba/</a>
@@ -246,26 +245,18 @@ func writePaste(h *diskv.Diskv, name string, data []byte) (key string, err error
 // 	return
 // }
 
+//Highlight (want the paste to be read by os and
 func Highlight(code string, lexer string, key string) (string, error) {
-	lexer := lexers.Analyse("package main\n\nfunc main()\n{\n}\n")
-	if lexer == nil {
-	  lexer = lexers.Fallback
-	}
-	lexer = chroma.Coalesce(lexer)
+
 	style := styles.Get("swapoff")
 	if style == nil {
-	  style = styles.Fallback
+		style = styles.Fallback
 	}
-	formatter := formatters.Get("html")
+	formatter := Get("html")
 	if formatter == nil {
-	  formatter = formatters.Fallback
+		formatter = Fallback
 	}
-	contents, err := ioutil.ReadAll(r)
-	iterator, err := lexer.Tokenise(nil, string(contents))
-	err := formatter.Format(w, style, iterator)
-	formatter := html.New(html.WithClasses())
-	err := formatter.WriteCSS(w, style)
-	cmd.Stdin = strings.NewReader(code)
+	return string(lexer), nil
 }
 
 func (h *handler) scan(w http.ResponseWriter, req *http.Request) {
@@ -428,8 +419,8 @@ func newHandler() http.Handler {
 	r.HandleFunc("/{file}", h.getCompost).Methods("GET")
 	r.HandleFunc("/", h.usage).Methods("GET")
 
-		r.HandleFunc("/scan/", h.scan).Methods("POST")
-		r.HandleFunc("/scan/", h.scan).Methods("POST")
+	r.HandleFunc("/scan/", h.scan).Methods("POST")
+	r.HandleFunc("/scan/", h.scan).Methods("POST")
 
 	r.HandleFunc("/{dir}/{file}", h.put).Methods("PUT")
 	r.HandleFunc("/{dir}/", h.put).Methods("PUT")
@@ -440,8 +431,8 @@ func newHandler() http.Handler {
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
-	api, _ := ioutil.ReadFile(apiKeyPath)
-	apiKey = strings.Replace(string(api), "\n", "", -1)
+	//api, _ := ioutil.ReadFile(apiKeyPath)
+	//apiKey = strings.Replace(string(api), "\n", "", -1)
 	vt, _ := ioutil.ReadFile(vtKeyPath)
 	vtKey = strings.Replace(string(vt), "\n", "", -1)
 	http.Handle("/", newHandler())
