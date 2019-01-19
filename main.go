@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	//chroma "github.com/alecthomas/chroma"
+	chroma "github.com/alecthomas/chroma"
 	virustotal "github.com/dutchcoders/go-virustotal"
 	"github.com/gorilla/mux"
 	"github.com/peterbourgon/diskv"
@@ -247,14 +247,25 @@ func writePaste(h *diskv.Diskv, name string, data []byte) (key string, err error
 // }
 
 func Highlight(code string, lexer string, key string) (string, error) {
-	cmd := exec.Command("pygmentize", "-l"+lexer, "-fhtml", "-O encoding=utf-8,full,style=borland,linenos=table,title="+key) //construct and exec html lexar
+	lexer := lexers.Analyse("package main\n\nfunc main()\n{\n}\n")
+	if lexer == nil {
+	  lexer = lexers.Fallback
+	}
+	lexer = chroma.Coalesce(lexer)
+	style := styles.Get("swapoff")
+	if style == nil {
+	  style = styles.Fallback
+	}
+	formatter := formatters.Get("html")
+	if formatter == nil {
+	  formatter = formatters.Fallback
+	}
+	contents, err := ioutil.ReadAll(r)
+	iterator, err := lexer.Tokenise(nil, string(contents))
+	err := formatter.Format(w, style, iterator)
+	formatter := html.New(html.WithClasses())
+	err := formatter.WriteCSS(w, style)
 	cmd.Stdin = strings.NewReader(code)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	return out.String(), err
 }
 
 func (h *handler) scan(w http.ResponseWriter, req *http.Request) {
