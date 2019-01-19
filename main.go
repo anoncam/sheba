@@ -40,6 +40,7 @@ import (
 /* --- config --- */
 const (
 	/* --- url settings ---  */
+  FormVal      = "p"
 	siteName     = "SHEBASH" // 7 char long title
 	minPasteSize = 16
 	maxPasteSize = 1024 * 1024 * 1024                                                // 1024 MB
@@ -81,7 +82,7 @@ var usageText = struct {
 
 		i.e. hit refresh ;)
     `,
-	virus: `
+	scan: `
     /scan/ will scan uploaded files for viruses using VirusTotal. The link
     to the VirusTotal scan results will be returned.
     `,
