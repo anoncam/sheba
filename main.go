@@ -217,34 +217,34 @@ func writePaste(h *diskv.Diskv, name string, data []byte) (key string, err error
 	return
 }
 
-func writeEmail(h *diskv.Diskv, timestamp, date, to, from, subject, body_html, body_plain, atachments string) {
-	var body string
-	if body_html != "" {
-		body = body_html
-	} else {
-		body = body_plain
-	}
-	h.Write(fmt.Sprintf("%s_%s.html", timestamp, subject), []byte(fmt.Sprintf("<pre>%s\nfrom: %s\nto: %s\nsubject: %s\n<hr>\n%s\n</pre>", date, from, to, subject, body)))
-}
-
-func craftMail(to, from, subject, body string) []byte {
-	data := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("To: %s\r\nFrom: %s@compst.io\r\nSubject: %s\r\n\r\n%s", to, from, subject, body)))
-	return []byte(fmt.Sprintf("{\"mail_from\":\"%s@compst.io\",\"rcpt_to\":[\"%s\"],\"data\":\"%s\"}", from, to, data))
-}
-
-func sendEmail(to, subject, body string) (key string, err error) {
-	key = newID()
-	b := bytes.NewBuffer(craftMail(to, key, subject, body))
-	req, err := http.NewRequest("POST", "https://postal.compst.io/api/v1/send/raw", b)
-	req.Header.Set("X-Server-API-Key", apiKey)
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	defer resp.Body.Close()
-	ba, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(ba))
-	return
-}
+// func writeEmail(h *diskv.Diskv, timestamp, date, to, from, subject, body_html, body_plain, atachments string) {
+// 	var body string
+// 	if body_html != "" {
+// 		body = body_html
+// 	} else {
+// 		body = body_plain
+// 	}
+// 	h.Write(fmt.Sprintf("%s_%s.html", timestamp, subject), []byte(fmt.Sprintf("<pre>%s\nfrom: %s\nto: %s\nsubject: %s\n<hr>\n%s\n</pre>", date, from, to, subject, body)))
+// }
+//
+// func craftMail(to, from, subject, body string) []byte {
+// 	data := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("To: %s\r\nFrom: %s@compst.io\r\nSubject: %s\r\n\r\n%s", to, from, subject, body)))
+// 	return []byte(fmt.Sprintf("{\"mail_from\":\"%s@compst.io\",\"rcpt_to\":[\"%s\"],\"data\":\"%s\"}", from, to, data))
+// }
+//
+// func sendEmail(to, subject, body string) (key string, err error) {
+// 	key = newID()
+// 	b := bytes.NewBuffer(craftMail(to, key, subject, body))
+// 	//TODO: err handle postal on subdomain
+// 	req.Header.Set("X-Server-API-Key", apiKey)
+// 	req.Header.Set("Content-Type", "application/json")
+// 	client := &http.Client{}
+// 	resp, err := client.Do(req)
+// 	defer resp.Body.Close()
+// 	ba, _ := ioutil.ReadAll(resp.Body)
+// 	fmt.Println(string(ba))
+// 	return
+// }
 
 func Highlight(code string, lexer string, key string) (string, error) {
 	cmd := exec.Command("pygmentize", "-l"+lexer, "-fhtml", "-O encoding=utf-8,full,style=borland,linenos=table,title="+key) //construct and exec html lexar
