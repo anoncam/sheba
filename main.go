@@ -388,7 +388,7 @@ func (h *handler) usage(w http.ResponseWriter, req *http.Request) {
 	case "temp":
 		dirUsage = usageText.temp
 	case "scan":
-		dirUsage = usageText.virus
+		dirUsage = usageText.scan
 	case "md":
 		dirUsage = usageText.md
 	default:
@@ -416,8 +416,8 @@ func newHandler() http.Handler {
 	r.HandleFunc("/{file}", h.getCompost).Methods("GET")
 	r.HandleFunc("/", h.usage).Methods("GET")
 
-	//	r.HandleFunc("/virus/", h.virus).Methods("POST")
-	//	r.HandleFunc("/virus", h.virus).Methods("POST")
+		r.HandleFunc("/scan/", h.scan).Methods("POST")
+		r.HandleFunc("/scan/", h.scan).Methods("POST")
 
 	r.HandleFunc("/{dir}/{file}", h.put).Methods("PUT")
 	r.HandleFunc("/{dir}/", h.put).Methods("PUT")
