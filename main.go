@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	chroma "github.com/alecthomas/chroma"
+	//chroma "github.com/alecthomas/chroma"
 	virustotal "github.com/dutchcoders/go-virustotal"
 	"github.com/gorilla/mux"
 	"github.com/peterbourgon/diskv"
@@ -74,7 +74,7 @@ var usageText = struct {
 
     ( EXAMPLE: sheba.sh/hootie/ )
 
-    Add ?{lang}
+    // TODO: Incorperate Lexers
     `,
 	temp: `
     /temp/ is a temporary paste subdir. For burner notes.  Once accessed, the file or, if custom, the directory is removed.
