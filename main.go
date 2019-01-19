@@ -277,7 +277,7 @@ func (h *handler) virus(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 	w.Write([]byte(fmt.Sprintf("%v\n", result.Permalink)))
-}*/
+}
 
 func (h *handler) getCompost(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
@@ -316,7 +316,7 @@ func (h *handler) getCompost(w http.ResponseWriter, req *http.Request) {
 				finPaste = paste
 			}
 		} else {
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8") 
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			finPaste = paste
 		}
 		fmt.Fprintf(w, "%s", finPaste)
