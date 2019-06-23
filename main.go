@@ -72,7 +72,7 @@ var usageText = struct {
 	index: `
     Custom urls are also available.
 
-    ( EXAMPLE: sheba.sh/hootie/ )
+    Simply add '/customdir/' to the end of the curl url.
 
     // TODO: Incorperate Lexers
     `,
