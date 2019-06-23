@@ -19,8 +19,8 @@ package main
 
 import (
 	"fmt"
-	. "github.com/alecthomas/chroma/formatters"
-	"github.com/alecthomas/chroma/styles"
+//	. "github.com/alecthomas/chroma/formatters" # lexer todo item.
+//	"github.com/alecthomas/chroma/styles"
 	"github.com/dutchcoders/go-virustotal"
 	"github.com/gorilla/mux"
 	"github.com/peterbourgon/diskv"
@@ -40,7 +40,7 @@ import (
 const (
 	/* --- url settings ---  */
 	formVal      = "p"
-	siteName     = "SHEBASH" // 7 char long title
+	siteName     = "p@$T3" // 7 char long title
 	minPasteSize = 16
 	maxPasteSize = 1024 * 1024 * 1024                                               // 1024 MB
 	urlLength    = 8                                                                // charlength of the url
@@ -57,7 +57,7 @@ const (
 	sslKeyPath  = "cert/privkey.pem"   // ssl priv key
 	apiKeyPath  = "cert/api.txt"       // postal api key
 	vtKeyPath   = "cert/vt.txt"        // virustotal api key
-	httpPort    = 80                   // http port
+	httpPort    = 1337                  // http port
 	bindAddress = ""                   // bind address
 )
 
@@ -133,13 +133,8 @@ UNIQUE SUBDIRS
     <a href="http://{{.BaseURL}}/scan/">{{.BaseURL}}/scan/</a> Use virus total api to return a report of a file you tee off to scan.
 
 SEE ALSO
-    {{.Name}} brought to you for free and open source at <a href="https://github.com/anoncam/sheba">https://github.com/anoncam/sheba/</a>
+    {{.Name}} brought to you for free and is open source at: <a href="https://github.com/anoncam/sheba">https://github.com/anoncam/sheba/  fork it.</a>
 
-DONATE
-XMR 4647Wo9XKjdEJ515Ch4N9S6tmEgMfiJ5UUEMAZTFw2jr5aWRANsQq5WgT1hVNfAiQAhpxwpYN1LBEdXKSA3aSLeJDJcZRGn
-BTC 1C22b9YGktv5JRhuU6n7424oQ71zkLRsyg
-LTC LQKngTfNM9NBBiFaranqxEcNbPBKtys5BJ
-DASH XhCLx3UPZaF1ydjERtfGgkW2A1nkAXEEyC
       </pre>
 </body>
 </html>
@@ -215,7 +210,7 @@ func writePaste(h *diskv.Diskv, name string, data []byte) (key string, err error
 	h.Write(key, data)
 	return
 }
-
+// TODO: setup email service with postal
 // func writeEmail(h *diskv.Diskv, timestamp, date, to, from, subject, body_html, body_plain, atachments string) {
 // 	var body string
 // 	if body_html != "" {
@@ -245,19 +240,20 @@ func writePaste(h *diskv.Diskv, name string, data []byte) (key string, err error
 // 	return
 // }
 
-//Highlight (want the paste to be read by os and
-func Highlight(code string, lexer string, key string) (string, error) {
-
-	style := styles.Get("swapoff")
-	if style == nil {
-		style = styles.Fallback
-	}
-	formatter := Get("html")
-	if formatter == nil {
-		formatter = Fallback
-	}
-	return string(lexer), nil
-}
+//Highlight using lexer appendage  to URL.  i.e. {{*.sh?go}}
+//func Highlight(code string, lexer string, key string) (string, error) {
+//
+//	style := styles.Get("swapoff")
+//	if style == nil {
+//		style = styles.Fallback
+//	}
+//	formatter := Get("html")
+//	if formatter == nil {
+//		formatter = Fallback
+//	}
+//	return string(lexer), nil
+//}
+// TODO: re-incorporate lexers with the chroma lib.
 
 func (h *handler) scan(w http.ResponseWriter, req *http.Request) {
 	j := diskv.New(diskv.Options{
@@ -283,7 +279,7 @@ func (h *handler) scan(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(fmt.Sprintf("%v\n", result.Permalink)))
 }
 
-func (h *handler) getCompost(w http.ResponseWriter, req *http.Request) {
+func (h *handler) getSheba(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	j := diskv.New(diskv.Options{
 		BasePath:     fmt.Sprintf("%s/_%s", basePath, vars["dir"]),
@@ -292,7 +288,7 @@ func (h *handler) getCompost(w http.ResponseWriter, req *http.Request) {
 	})
 
 	if useSSL {
-		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains") //ssl lab bullshit
+		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains") //ssl lab
 	}
 	if vars["file"] != "" {
 		paste, err := readPaste(j, vars["file"])
@@ -313,7 +309,7 @@ func (h *handler) getCompost(w http.ResponseWriter, req *http.Request) {
 			finPaste = string(md.Markdown([]byte(paste)))
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		} else if req.URL.RawQuery != "" {
-			finPaste, err = Highlight(paste, req.URL.RawQuery, vars["file"])
+			//finPaste, err = Highlight(paste, req.URL.RawQuery, vars["file"]) TODO: fix for lexers
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			if err != nil {
 				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -408,15 +404,15 @@ func (h *handler) usage(w http.ResponseWriter, req *http.Request) {
 
 func newHandler() http.Handler {
 	h := handler{}
-	/* add config for static subdir */
+	/* add config for static subdirectory */
 	r := mux.NewRouter().StrictSlash(false)
 
 	r.HandleFunc("/{dir}/", h.usage).Methods("GET")
 	r.PathPrefix("/mail/").Handler(http.StripPrefix("/mail/", http.FileServer(http.Dir(fmt.Sprintf("%s/_mail", basePath))))).Methods("GET")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(fmt.Sprintf("%s/_static", basePath))))).Methods("GET")
 	r.PathPrefix("/.well-known/").Handler(http.StripPrefix("/.well-known/", http.FileServer(http.Dir(".well-known")))) // letsencrypt
-	r.HandleFunc("/{dir}/{file}", h.getCompost).Methods("GET")
-	r.HandleFunc("/{file}", h.getCompost).Methods("GET")
+	r.HandleFunc("/{dir}/{file}", h.getSheba).Methods("GET")
+	r.HandleFunc("/{file}", h.getSheba).Methods("GET")
 	r.HandleFunc("/", h.usage).Methods("GET")
 
 	r.HandleFunc("/scan/", h.scan).Methods("POST")
